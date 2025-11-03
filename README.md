@@ -15,29 +15,31 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-**Jelaskan apa itu widget tree pada Flutter dan bagaimana hubungan parent-child (induk-anak) 
-bekerja antar widget.**
-Semua hal di layar (teks, tombol, kolom, dll) adalah widget, dimana widget ini disusun dalam 
+# Tugas 7
+
+## **Jelaskan apa itu widget tree pada Flutter dan bagaimana hubungan parent-child (induk-anak) bekerja antar widget.**
+- Semua hal di layar (teks, tombol, kolom, dll) adalah widget, dimana widget ini disusun dalam 
 hierarki menjadi seperti struktur tree yang disebut sebagai widget tree.
 - Parent widget (induk): widget yang membungkus widget lain di dalamnya.
 - Child widget (anak): widget yang berada di dalam parent, menerima tata letak dan perilaku 
 induknya.
-- 
-Contoh:
+
+### Contoh:
+```dart
 Scaffold(
   appBar: AppBar(title: Text('Judul')),
   body: Center(
       child: Text('Halo Flutter!'),
   ),
 )
+```
+
 Hierarkinya: Scaffold menjadi parent, dengan child AppBar dan Center, dimana masing-masing child 
 ini memiliki child lagi berupa text.
 Setiap parent mengontrol posisi, gaya, dan perilaku child-nya.
 
 
-
-
-Sebutkan semua widget yang kamu gunakan dalam proyek ini dan jelaskan fungsinya.
+## **Sebutkan semua widget yang kamu gunakan dalam proyek ini dan jelaskan fungsinya.**
 - MaterialApp: pembungkus utama aplikasi berbasis Material Design. Mengatur tema, navigasi, dan 
 struktur aplikasi
 - Scaffold: menyediakan struktur dasar halaman seperti AppBar, Body, dan FloatingActionButton.
@@ -56,12 +58,7 @@ struktur aplikasi
 - SizedBox: memberi jarak antar widget dengan tinggi/lebar tertentu
 
 
-
-
-
-
-Apa fungsi dari widget MaterialApp? Jelaskan mengapa widget ini sering digunakan sebagai widget 
-root.
+## **Apa fungsi dari widget MaterialApp? Jelaskan mengapa widget ini sering digunakan sebagai widget root**.
 Widget utama yang menginisialisasi seluruh aplikasi Flutter berbasis Material Design.
 Fungsi utama:
 - Mengatur tema warna global (ThemeData)
@@ -74,10 +71,7 @@ FloatingActionButton memerlukan material context yang disediakan oleh MaterialAp
 tampilan tidak akan memiliki gaya khas Android/Material.
 
 
-
-
-
-Jelaskan perbedaan antara StatelessWidget dan StatefulWidget. Kapan kamu memilih salah satunya?
+## **Jelaskan perbedaan antara StatelessWidget dan StatefulWidget. Kapan kamu memilih salah satunya?**
 StatelessWidget: 
 - Tidak memiliki state (data tidak berubah selama runtime).
 - Saat tampilan statis, seperti teks, ikon, atau halaman yang tidak berubah
@@ -94,10 +88,7 @@ dan tidak berubah, maka StatelessWidget menjadi pilihan. Namun, ketika widget ya
 dapat berubah-ubah tampilan/isinya, maka StatefulWidget menjadi pilihan yang cocok untuk digunakan
 
 
-
-
-
-Apa itu BuildContext dan mengapa penting di Flutter? Bagaimana penggunaannya di metode build?
+## **Apa itu BuildContext dan mengapa penting di Flutter? Bagaimana penggunaannya di metode build?**
 Referensi ke posisi widget dalam widget tree. Memberikan akses ke:
 - Tema (Theme.of(context))
 - Navigasi (Navigator.of(context))
@@ -112,11 +103,7 @@ Penggunaan di metode build():
 dengan parent.
 
 
-
-
-
-
-Jelaskan konsep "hot reload" di Flutter dan bagaimana bedanya dengan "hot restart".
+## **Jelaskan konsep "hot reload" di Flutter dan bagaimana bedanya dengan "hot restart".**
 Hot Reload: 
 - Memuat ulang kode yang berubah tanpa menghentikan aplikasi
 - State tetap (misalnya, halaman tetap di posisi sebelumnya)
@@ -129,10 +116,5 @@ Biasanya Hot Reload digunakan saat mengedit UI atau teks, sedangkan Hot Restart 
 kamu ubah struktur kode besar seperti variabel global atau constructor.
 
 
-
-
-
-
-
-Jelaskan bagaimana kamu menambahkan navigasi untuk berpindah antar layar di aplikasi Flutter.
+## **Jelaskan bagaimana kamu menambahkan navigasi untuk berpindah antar layar di aplikasi Flutter.**
 - Dengan Navigator dan Route
