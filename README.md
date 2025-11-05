@@ -148,34 +148,4 @@ Contoh pada kode:
 - Hot restart diperlukan jika mengubah struktur MaterialApp atau items list di root.
 
 
-## **Jelaskan bagaimana kamu menambahkan navigasi untuk berpindah antar layar di aplikasi Flutter.**
-Navigasi menggunakan Navigator, yang mengelola stack halaman.
-- Push: menambahkan halaman baru di stack
-```
-Navigator.push(
-  context,
-  MaterialPageRoute(builder: (context) => DetailPage(item: item)),
-);
-```
-
-- Pop: kembali ke halaman sebelumnya
-```
-Navigator.pop(context);
-```
-
-- Named Routes: lebih terstruktur untuk banyak halaman
-```
-MaterialApp(
-  initialRoute: '/',
-  routes: {
-    '/': (context) => MyHomePage(),
-    '/detail': (context) => DetailPage(),
-  },
-);
-
-Navigator.pushNamed(context, '/detail');
-```
-
-Pada kode, saat menekan ItemCard, bisa diganti SnackBar dengna navigasi ke halaman detail.
-
 </details>
