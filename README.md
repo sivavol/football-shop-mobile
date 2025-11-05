@@ -76,7 +76,7 @@ struktur aplikasi
 - ScaffoldMessenger: mengatur dan menampilkan SnackBar di dalam Scaffold
 - SizedBox: memberikan ruang kosong dengna ukuran tertentu/membungkus child untuk membatasi ukuran
 
-ItemCard adalah widget buatan sendiri karena extend StatelessWidget, untuk menampilkan setiap menu.
+ItemCard adalah widget buatan sendiri karena extend StatelessWidget, sebagai kartu interaktif dan visual yang menampilkan ikon dna teks di dalam sebuah gridview.
 
 
 ## **Apa fungsi dari widget MaterialApp? Jelaskan mengapa widget ini sering digunakan sebagai widget root**.
