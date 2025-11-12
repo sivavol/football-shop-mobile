@@ -26,7 +26,30 @@ Widget adalah semua elemen UI/hal yang berada di layar (teks, tombol, kolom, dLL
 hierarki menjadi seperti struktur tree yang disebut sebagai widget tree.
 - Parent widget (induk): widget yang membungkus widget lain di dalamnya, mengatur layout(posisi, gaya) dan perilaku anaknya
 - Child widget (anak): widget yang berada di dalam parent, menerima tata letak dan perilaku induknya (mengikuti aturan parent). Child juga bisa memiliki child sendiri (nested).
+- Parent widget (induk): widget yang membungkus widget lain di dalamnya, mengatur layout(posisi, gaya) dan perilaku anaknya
+- Child widget (anak): widget yang berada di dalam parent, menerima tata letak dan perilaku induknya (mengikuti aturan parent). Child juga bisa memiliki child sendiri (nested).
 
+### Contoh pada kode:
+```
+MaterialApp( // Root
+  home: MyHomePage(), // Child
+)
+
+Scaffold( // Parent
+  appBar: AppBar(...), // Child langsung dari Scaffold
+  body: Padding( 
+    child: Column( 
+      children: [
+        Center( 
+          child: Column( 
+            children: [
+              Text(...), // Child paling dalam
+              GridView.count(...),
+            ],
+          ),
+        ),
+      ],
+    ),
 ### Contoh pada kode:
 ```
 MaterialApp( // Root
@@ -58,6 +81,13 @@ Scaffold( // Parent
 - Center menempatkan kolom teks dan grid di tengah layar
 - GridView.count membuat tampilan grid untuk item menu
 - Hierarki ini memungkinkan kontrol tata letak dan perilaku secara konsisten, misal Scaffold mengatur layout dasar, Column mengatur susunan vertikal, dan Center mengatur posisi di tengah.
+- Material App menyediakan Material context untuk semua widget Material di bawahnya.
+- Scaffold adalah parent utama untuk halaman
+- AppBar dan Padding adalah child langsung dari Scaffold
+- Di dalam Padding, terdapat Column yang menata widget secara vertikal
+- Center menempatkan kolom teks dan grid di tengah layar
+- GridView.count membuat tampilan grid untuk item menu
+- Hierarki ini memungkinkan kontrol tata letak dan perilaku secara konsisten, misal Scaffold mengatur layout dasar, Column mengatur susunan vertikal, dan Center mengatur posisi di tengah.
 
 
 ## **Sebutkan semua widget yang kamu gunakan dalam proyek ini dan jelaskan fungsinya.**
@@ -68,14 +98,21 @@ Scaffold( // Parent
 - Padding: memberikan jarak di sekeliling widget di dalamnya
 - Column: menyusun widget anak secara vertikal(kolom)
 - Center: menempatkan widget di tengah halaman
+- Center: menempatkan widget di tengah halaman
 - Text: menampilkan teks di layar
 - GridView.count: membuat tata letak grid dengan jumlah kolom tetap
+- Material: memberikan tampilan Material (warna, elevation, efek sentuh)
+- InkWell: memberikan efek klik saat widget ditekan
 - Material: memberikan tampilan Material (warna, elevation, efek sentuh)
 - InkWell: memberikan efek klik saat widget ditekan
 - Container: pembungkus fleksibel yang bisa diatur ukuran, warna, dan paddingnya
 - Icon: menampilkan ikon bawaan dari Material Icons
 - SnackBar: menampilkan notifikasi/pesan sementara di layar
+- SnackBar: menampilkan notifikasi/pesan sementara di layar
 - ScaffoldMessenger: mengatur dan menampilkan SnackBar di dalam Scaffold
+- SizedBox: memberikan ruang kosong dengna ukuran tertentu/membungkus child untuk membatasi ukuran
+
+ItemCard adalah widget buatan sendiri karena extend StatelessWidget, sebagai kartu interaktif dan visual yang menampilkan ikon dna teks di dalam sebuah gridview.
 - SizedBox: memberikan ruang kosong dengna ukuran tertentu/membungkus child untuk membatasi ukuran
 
 ItemCard adalah widget buatan sendiri karena extend StatelessWidget, sebagai kartu interaktif dan visual yang menampilkan ikon dna teks di dalam sebuah gridview.
@@ -83,12 +120,17 @@ ItemCard adalah widget buatan sendiri karena extend StatelessWidget, sebagai kar
 
 ## **Apa fungsi dari widget MaterialApp? Jelaskan mengapa widget ini sering digunakan sebagai widget root**.
 Widget utama yang menginisialisasi seluruh aplikasi Flutter berbasis Material, seperti Scaffold, AppBar, dan SnackBar.
+Widget utama yang menginisialisasi seluruh aplikasi Flutter berbasis Material, seperti Scaffold, AppBar, dan SnackBar.
 Fungsi utama:
+- Menyediakan tema global (ThemeData) agar seluruh aplikasi konsisten warna, font, dan style. -> di kode: ColorScheme.fromSeed(seedColor:Colors.deepPurple)
+- Mengelola navigasi antar halaman menggunakan home, routes, dan Navigator
 - Menyediakan tema global (ThemeData) agar seluruh aplikasi konsisten warna, font, dan style. -> di kode: ColorScheme.fromSeed(seedColor:Colors.deepPurple)
 - Mengelola navigasi antar halaman menggunakan home, routes, dan Navigator
 - Menyediakan context Material Design untuk widget seperti Scaffold, AppBar, dan SnackBar, dll
 - Menentukan judul aplikasi dna fitur localization jika diperlukan
+- Menentukan judul aplikasi dna fitur localization jika diperlukan
 
+Sering digunakan sebagai root karena semua widget Material seperti Scaffold dan AppBar memerlukan Material context yang disediakan oleh MaterialApp. Tanpa MaterialApp, tampilan tidak akan sesuai Material Design, widget seperti Scaffold atau AppBar tidak akan memiliki gaya Material yang sesuai.
 Sering digunakan sebagai root karena semua widget Material seperti Scaffold dan AppBar memerlukan Material context yang disediakan oleh MaterialApp. Tanpa MaterialApp, tampilan tidak akan sesuai Material Design, widget seperti Scaffold atau AppBar tidak akan memiliki gaya Material yang sesuai.
 
 
@@ -98,12 +140,20 @@ StatelessWidget:
 - Tampilan statis / UI tidak berubah setelah dibuat
 - Cocok untuk teks, ikon, atau halaman yang tidak berubah
 - ContohL MyApp, MyHomePage, ItemCard (karena tampilannya tidak berubah setelah dibuat)
+- Tampilan statis / UI tidak berubah setelah dibuat
+- Cocok untuk teks, ikon, atau halaman yang tidak berubah
+- ContohL MyApp, MyHomePage, ItemCard (karena tampilannya tidak berubah setelah dibuat)
 
 StatefulWidget:
 - Memiliki state yang bisa berubah dan mengubah tampilan
 - Tampilan dinamis / UI akan rebuild ketika state berubah
 - Cocok untuk form input, animasi, atau toggle
+- Tampilan dinamis / UI akan rebuild ketika state berubah
+- Cocok untuk form input, animasi, atau toggle
 
+Pemilihan bergantung pada keinginan developer untuk widget tersebut.
+- StatelessWidget jika UI tetap
+- StatefulWidget jika UI perlu berubah sesuai aksi pengguna atau data runtime
 Pemilihan bergantung pada keinginan developer untuk widget tersebut.
 - StatelessWidget jika UI tetap
 - StatefulWidget jika UI perlu berubah sesuai aksi pengguna atau data runtime
@@ -115,6 +165,15 @@ Memberikan akses ke parent, theme, navigator, scaffold:
 - Tema (Theme.of(context))
 - Navigasi (Navigator.of(context))
 - Scaffold (ScaffoldMessenger.of(context))
+
+Contoh:
+``` 
+ScaffoldMessenger.of(context)
+  ..hideCurrentSnackBar()
+  ..showSnackBar(
+    SnackBar(content: Text("Kamu telah menekan tombol ${item.name}"))
+  );
+```
 
 Contoh:
 ``` 
@@ -137,6 +196,8 @@ Penggunaan di metode build():
 ## **Jelaskan konsep "hot reload" di Flutter dan bagaimana bedanya dengan "hot restart".**
 Hot Reload:
 - Memuat ulang kode yang berubah tanpa menghentikan aplikasi
+- State aplikasi tetap (misalnya, halaman, scroll, atau input tetap di posisi sebelumnya)
+- Cocok untuk mengubah teks, layout, atau UI kecil
 - State aplikasi tetap (misalnya, halaman, scroll, atau input tetap di posisi sebelumnya)
 - Cocok untuk mengubah teks, layout, atau UI kecil
 
