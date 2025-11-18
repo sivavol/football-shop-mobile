@@ -231,3 +231,151 @@ theme: ThemeData(
 Dengan ini, setiap halaman dan komponen memiliki gaya visual yang seragam dan lebih konsisten, sehingga pengguna dapat mengenali karakter brand Football Shop.
 
 </details>
+
+<details>
+<summary> Tugas 9
+</summary>
+
+# Tugas 9
+
+## **Jelaskan mengapa kita perlu membuat model Dart saat mengambil/mengirim data JSON? Apa konsekuensinya jika langsung memetakan Map<String, dynamic> tanpa model (terkait validasi tipe, null-safety, maintainability)?**
+Model dart dapat digunakan untuk mempermudah pengelolaan dan manipulai data yang diambil/dikitim dalam JSON.
+
+- Validasi tipe:
+Model memberi tipe yang jelas seperti String, int, boolean, DateTime.
+Tanpa model, kita harus manual menebak tipe nilai dari Map.
+
+- Null-safety:
+Model menentukan apakah suatu field wajib(required) atau bisa null(String?).
+Tanpa model, rawan terjadi error runtime karena akses field yang null.
+
+- Maintainability:
+Jika struktur JSON backend berubah, cukup memperbarui model.
+Tanpa model, seluruh kode yang akses Map harus diubah satu per satu.
+
+Jika langsung pakai Map<String, dynamic>:
+- Raw error seperti NoSuchMethodError karena field tidak ada.
+- Rawan salah cast tipe (misal String dianggap int).
+- Tidak ada null-safety → aplikasi bisa crash.
+- Kode jadi sulit dipelihara dan dibaca.
+
+## **Apa fungsi package http dan CookieRequest dalam tugas ini? Jelaskan perbedaan peran http vs CookieRequest.**
+http package:
+- Digunakan untuk request/permintaan HTTP biasa (GET/POST).
+- Tidak menyimpan cookie.
+- Cocok untuk API open / public endpoint.
+Pada tugas ini, fungsi package http adalah untuk mengambil data JSON dari server Django dengan metode GET dan mengirimkannya dengan POST
+
+Contoh:
+```
+final response = await http.get(Uri.parse(url));
+```
+
+CookieRequest (dari pbp_django_auth):
+- Wrapper HTTP khusus untuk integrasi dengan Django.
+- Otomatis menyimpan cookie session dari Django.
+- Digunakan untuk endpoint yang membutuhkan autentikasi (login, logout, form, CRUD user-specific).
+- Mempertahankan sesi pengguna di seluruh aplikasi.
+Pada tugas ini, digunakan untuk menyimpan status pengguna ketika login
+
+Contoh: 
+```
+final request = context.watch<CookieRequest>();
+final response = await request.login(username, password);
+```
+
+Perbedaan:
+???
+
+
+
+## **Jelaskan mengapa instance CookieRequest perlu untuk dibagikan ke semua komponen di aplikasi Flutter.**
+Instance CookieRequest perlu dibagikan ke semua komponen karena CookieRequest menyimpan cookie session, status login (loggedIn), informasi user, authentication header bawaan
+
+Jika tiap halaman membuat instance baru, session hilang, user dianggap logout, dan request tidak membawa cookie → request ditolak backend
+
+Dengan Provider, hanya ada satu instance CookieRequest untuk seluruh aplikasi.
+
+Sehingga, user tetap login meskipun pindah halaman, semua request membawa session yang sama, dan sinkron dengan Django Authentication
+
+## **Jelaskan konfigurasi konektivitas yang diperlukan agar Flutter dapat berkomunikasi dengan Django. Mengapa kita perlu menambahkan 10.0.2.2 pada ALLOWED_HOSTS, mengaktifkan CORS dan pengaturan SameSite/cookie, dan menambahkan izin akses internet di Android? Apa yang akan terjadi jika konfigurasi tersebut tidak dilakukan dengan benar?**
+- Menambahkan 10.0.2.2 pada ALLOWED_HOSTS: Android emulator mengakses localhost komputer melalui 10.0.2.2. 
+Jika tidak ditambahkan, Django menolak request dengan error Bad Request: Invalid Host Header.
+
+- Mengaktifkan CORS: Karena Flutter (mobile/web) mengakses Django API lintas origin. Menggunakan django-cors-headers: CORS_ALLOW_ALL_ORIGINS = True
+Jika tidak, Browser/webview memblokir request karena CORS policy.
+
+- Pengaturan SameSite/cookie
+Django default: SESSION_COOKIE_SAMESITE = 'Lax'
+Untuk API mobile yang mengirim cookie via cross-site:
+```
+SESSION_COOKIE_SAMESITE = None
+SESSION_COOKIE_SECURE = True
+```
+Jika tidak, Cookie tidak terkirim → login tidak tersimpan, selalu dianggap logout.
+
+- Menambahkan izin akses internet di Android
+AndroidManifest.xml → tambahkan:
+```<uses-permission android:name="android.permission.INTERNET"/>```
+Jika tidak, Flutter tidak bisa mengakses jaringan sama sekali.
+
+Kesimpulan jika salah konfigurasi:
+- tidak bisa login
+- request ditolak Django
+- cookie tidak terkirim
+- API tidak bisa diakses dari emulator
+- session tidak terbaca, selalu logout
+
+## **Jelaskan mekanisme pengiriman data mulai dari input hingga dapat ditampilkan pada Flutter.**
+1. User mengisi form di Flutter
+- Misalnya form tambah produk.
+
+2. Flutter memvalidasi input
+- Menggunakan Form + TextFormField.
+
+3. Data dikirim ke Django
+- Menggunakan: ```CookieRequest.post() → authenticated``` atau ```http.post() → public```
+
+4. Django menerima request
+Backend:
+- memproses form
+- membuat object baru di database
+- mengembalikan JSON response
+
+5. Flutter menerima JSON
+- JSON → model Dart (ProductEntry.fromJson()).
+
+6. Ditampilkan di Flutter
+- Biasanya menggunakan FutureBuilder atau state management.
+
+## **Jelaskan mekanisme autentikasi dari login, register, hingga logout. Mulai dari input data akun pada Flutter ke Django hingga selesainya proses autentikasi oleh Django dan tampilnya menu pada Flutter.**
+A. Register
+User mengisi form register di Flutter.
+Flutter kirim POST ke Django (/auth/register/).
+Django membuat akun baru.
+Django kirim response sukses → Flutter tampilkan pesan hasil.
+
+B. Login
+User input username & password.
+Flutter memanggil request.login(username, password).
+Django memvalidasi login.
+Jika benar:
+- Django mengembalikan cookie session
+- CookieRequest menyimpannya secara otomatis
+Flutter now "logged in" → navigasi ke home page.
+
+C. Mengakses halaman privat
+Setiap request menggunakan CookieRequest otomatis membawa:
+- sessionid
+- CSRF token
+Django mengenali user → memberi data khusus user.
+
+D. Logout
+Flutter memanggil request.logout().
+Django menghapus session.
+CookieRequest mengosongkan cookie.
+Flutter kembali ke halaman login dan tidak bisa kembali ke halaman lama.
+
+## **Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step! (bukan hanya sekadar mengikuti tutorial).**
+
+</details>
