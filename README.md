@@ -285,9 +285,8 @@ final response = await request.login(username, password);
 ```
 
 Perbedaan:
-???
-
-
+Package http digunakan untuk melakukan request HTTP standar yang tidak membutuhkan autentikasi, seperti mengambil data JSON terbuka dari Django.
+Sedangkan CookieRequest menyimpan dan mengelola cookie session Django sehingga dapat digunakan untuk login, logout, dan mengakses endpoint yang membutuhkan autentikasi. Dengan demikian, http cocok untuk public endpoint, sementara CookieRequest wajib digunakan untuk fitur yang memerlukan status user.
 
 ## **Jelaskan mengapa instance CookieRequest perlu untuk dibagikan ke semua komponen di aplikasi Flutter.**
 Instance CookieRequest perlu dibagikan ke semua komponen karena CookieRequest menyimpan cookie session, status login (loggedIn), informasi user, authentication header bawaan
@@ -377,5 +376,164 @@ CookieRequest mengosongkan cookie.
 Flutter kembali ke halaman login dan tidak bisa kembali ke halaman lama.
 
 ## **Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step! (bukan hanya sekadar mengikuti tutorial).**
+1. Memastikan deployment proyek tugas Django kamu telah berjalan dengan baik.
+2. Mengimplementasikan fitur registrasi akun pada proyek tugas Flutter.
+- Membuat django app baru bernama authentication
+- Menambahkan app authentication ke INSTALLED_APPS pada main project settings.py aplikasi Django.
+
+- Menambahkan path authentication pada urls.py aplikasi (football_shop/urls.py)
+
+- Menambahkan fungsi registrasi pada authentication/views.py dan juga routing path pada urls.py
+```
+@csrf_exempt
+def register(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data['username']
+        password1 = data['password1']
+        password2 = data['password2']
+
+        # Check if the passwords match
+        if password1 != password2:
+            return JsonResponse({
+                "status": False,
+                "message": "Passwords do not match."
+            }, status=400)
+        
+        # Check if the username is already taken
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({
+                "status": False,
+                "message": "Username already exists."
+            }, status=400)
+        
+        # Create the new user
+        user = User.objects.create_user(username=username, password=password1)
+        user.save()
+        
+        return JsonResponse({
+            "username": user.username,
+            "status": 'success',
+            "message": "User created successfully!"
+        }, status=200)
+    
+    else:
+        return JsonResponse({
+            "status": False,
+            "message": "Invalid request method."
+        }, status=400)
+```
+- Membuat file baru register.dart untuk implementasi registrasi pada flutter, berisi input username, password, dan password confirmation dengan logika untuk mengirim data ke endpoint Django menggunakan request.postJson. Ketika berhasil melakukan registrasi, navigator menuju login page untuk ditampilkan ke pengguna.
+
+3. Membuat halaman login pada proyek tugas Flutter.
+- Menambahkan fungsi registrasi pada authentication/views.py dan juga routing path pada urls.py
+```
+@csrf_exempt
+def login(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        if user.is_active:
+            auth_login(request, user)
+            # Login status successful.
+            return JsonResponse({
+                "username": user.username,
+                "status": True,
+                "message": "Login successful!"
+                # Add other data if you want to send data to Flutter.
+            }, status=200)
+        else:
+            return JsonResponse({
+                "status": False,
+                "message": "Login failed, account is disabled."
+            }, status=401)
+
+    else:
+        return JsonResponse({
+            "status": False,
+            "message": "Login failed, please check your username or password."
+        }, status=401)
+```
+- Membuat file baru login.dart untuk mengimplementasi login pada flutter, dengan input username dan password dengan logika untuk mengirim data login ke endpoint Django. Ketika berhasil melakukan registrasi, navigator menuju home page (halaman utama) untuk ditampilkan ke pengguna.
+
+4. Mengintegrasikan sistem autentikasi Django dengan proyek tugas Flutter.
+-  Menyalakan virtual environment, kemudian menginstall library cors-headers dan menambahkan middleware.
+Steps:
+- Menambahkan 'django-cors-header' pada requirements.txt
+- Menginstall library dengan `pip install django-cors-headers`
+- Menambahkan corsheaders ke INSTALLED_APPS pada main project settings.py aplikasi
+- Menambahkan corsheaders.middleware.CorsMiddleware ke MIDDLEWARE pada main project settings.py plikasi
+- Menambahkan variabel pada main project settings.py aplikasi:
+```
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
+```
+- Menambahkan '10.0.2.2' pada ALLOWED_HOSTS di settings.py
+
+- Install package provider dan pbp_django_auth
+```
+flutter pub add provider
+flutter pub add pbp_django_auth
+```
+- Modifikasi root widget untuk menyediakan CookieRequest library ke semua child widgets dengan menggunakan Provider
+```
+return Provider(
+    create: (_) {
+        CookieRequest request = CookieRequest();
+        return request;
+    },
+    ...
+)
+```
+
+5. Membuat model kustom sesuai dengan proyek aplikasi Django.
+- Mengambil data pada Django dalam format JSON dan dikonversikan menjadi model Dart dengan menggunakan website Quicktype.
+- Membuat file baru untuk menyimpan models untuk diisi, serta memastikan semua attribute memiliki field dan ketentuan yang sesuai dengan yang sebelumnya.
+
+6. Membuat halaman yang berisi daftar semua item yang terdapat pada endpoint JSON di Django yang telah kamu deploy. (Tampilkan name, price, description, thumbnail, category, dan is_featured dari masing-masing item pada halaman ini (Dapat disesuaikan dengan field yang kalian buat sebelumnya)).
+- Menambahkan package http dengan perintah `flutter pub add http`
+- Pada file android/app/src/main/AndroidManifest.xml, memperbolehkan akses internet pada aplikasi flutter dengan:
+```
+    <application>
+    ...
+    </application>
+    <!-- Required to fetch data from the Internet. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+```
+
+- Membuat file product_entry_card.dart sebagai tampilan card dan diisi sesuai tampilan yang diinginkan dengan menampilkan semua attributes models.
+
+Pada product_entry_list.dart:
+- Mengambil data JSON untuk dikonversikan menjadi objects
+```
+final response = await request.get('http://127.0.0.1:8000/json/');
+
+    // Decode response to json format
+    var data = response;
+
+    // Convert json data to productEntry objects
+    List<ProductEntry> listProduct = [];
+    for (var d in data) {
+      if (d != null) {
+        listProduct.add(ProductEntry.fromJson(d));
+      }
+    }
+    return listProduct;
+```
+- Data yang telah didapat akan ditampilkan dalam FutureBuilder dengan tampilan card sesuai yang telah dibuat pada file product_entry_card.
+
+7. Membuat halaman detail untuk setiap item yang terdapat pada halaman daftar Item. (Halaman ini dapat diakses dengan menekan salah satu card item pada halaman daftar Item. Tampilkan seluruh atribut pada model item kamu pada halaman ini.)
+- Membuat file baru product_detail.dart sebagai tampilan halaman product detail. Berisi tampilan sesuai yang diinginkan dan menampilkan seluruh atribut pada model item
+- Pada product_entry_list.dart, menambahkan navigasi sehingga ketika card ditekan, akan menuju ke halaman detail untuk product tersebut.
+
+8. Melakukan filter pada halaman daftar item dengan hanya menampilkan item yang terasosiasi dengan pengguna yang login.
+- Menambahkan fungsi dan routing baru pada Django untuk filter dan menadapatkan product hanya pengguna yang login (request user).
+- Membuat file baru bernama my_product.dart, yang berisi pengambilan data product hanya milik pengguna.
+- Pada product_card.dart akan ditambahkan navigasi menuju ke halaman product yang terlah difilter (menampilkan my product).
 
 </details>
